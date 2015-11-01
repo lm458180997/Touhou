@@ -1,0 +1,11 @@
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\obj\x86\Release\FastLoopExample.Form1.resources
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\obj\x86\Release\FastLoopExample.Properties.Resources.resources
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\obj\x86\Release\FastLoopExample.csproj.GenerateResource.Cache
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\bin\x86\Release\FastLoopExample.exe
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\bin\x86\Release\FastLoopExample.pdb
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\bin\x86\Release\Bass.Net.dll
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\bin\x86\Release\Bass.Net.xml
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\obj\x86\Release\FastLoopExample.exe
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\obj\x86\Release\FastLoopExample.pdb
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\obj\x86\Release\FastLoopExample.csprojResolveAssemblyReference.cache
+F:\C#学习\Projects\FastLoopExample\FastLoopExample\bin\x86\Release\MySQLDriverCS.dll
