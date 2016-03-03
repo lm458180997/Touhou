@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{80949F30-B39D-4262-9756-4F9E42BB4FF2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FastLoopExample</RootNamespace>
+    <AssemblyName>FastLoopExample</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Bass.Net, Version=2.4.11.0, Culture=neutral, PublicKeyToken=b7566c273e6ef480, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Tao.DevIl, Version=1.6.8.3, Culture=neutral, PublicKeyToken=7ec4053013524957, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\ApplicationManager\Tao\TaoFramework\bin\Tao.DevIl.dll</HintPath>
+    </Reference>
+    <Reference Include="Tao.Glfw, Version=2.6.0.0, Culture=neutral, PublicKeyToken=2bb092b6587e4402, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\ApplicationManager\Tao\TaoFramework\bin\Tao.Glfw.dll</HintPath>
+    </Reference>
+    <Reference Include="Tao.OpenAl, Version=1.1.0.1, Culture=neutral, PublicKeyToken=a7579dda88828311, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\ApplicationManager\Tao\TaoFramework\bin\Tao.OpenAl.dll</HintPath>
+    </Reference>
+    <Reference Include="Tao.OpenGl, Version=2.1.0.12, Culture=neutral, PublicKeyToken=1ca010269a4501ef, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\ApplicationManager\Tao\TaoFramework\bin\Tao.OpenGl.dll</HintPath>
+    </Reference>
+    <Reference Include="Tao.Platform.Windows, Version=1.0.0.5, Culture=neutral, PublicKeyToken=701104b2da67a104, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\ApplicationManager\Tao\TaoFramework\bin\Tao.Platform.Windows.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ACGfile\AboutLura.cs" />
+    <Compile Include="Datas.cs" />
+    <Compile Include="Entities\Bullet\Bullet.cs" />
+    <Compile Include="Entities\Bullet\BulletData.cs" />
+    <Compile Include="Entities\Bullet\BulletEffect.cs" />
+    <Compile Include="Entities\Bullet\DirectBullet.cs" />
+    <Compile Include="Entities\Bullet\ReimuBullet.cs" />
+    <Compile Include="Entities\Bullet\Stage01_EB01.cs" />
+    <Compile Include="Entities\Controlors\Controler.cs" />
+    <Compile Include="Entities\Controlors\Stage01_E01c.cs" />
+    <Compile Include="Entities\Controlors\Stage01_EB01c.cs" />
+    <Compile Include="Entities\Effects\Effect.cs" />
+    <Compile Include="Entities\Effects\Particles.cs" />
+    <Compile Include="Entities\Enemys\EnemyData.cs" />
+    <Compile Include="Entities\Enemys\Stage01_E01.cs" />
+    <Compile Include="Entities\Items\Item.cs" />
+    <Compile Include="Entities\ParticleColiiders\PartticleCollider.cs" />
+    <Compile Include="Entities\Players\PlayerComponents.cs" />
+    <Compile Include="Extra\Component.cs" />
+    <Compile Include="Entities\Players\StateType.cs" />
+    <Compile Include="Extra\Animation.cs" />
+    <Compile Include="Extra\Batch.cs" />
+    <Compile Include="Extra\CmpMessage.cs" />
+    <Compile Include="Extra\Renderer.cs" />
+    <Compile Include="Extra\StateMachine.cs" />
+    <Compile Include="Extra\TCset.cs" />
+    <Compile Include="Extra\TextFontEx.cs" />
+    <Compile Include="Entities\Enemys\Enemy.cs" />
+    <Compile Include="Entities\Entity\Entity.cs" />
+    <Compile Include="Extra\Timer.cs" />
+    <Compile Include="Extra\VariableSprite.cs" />
+    <Compile Include="FileControl.cs" />
+    <Compile Include="GameState\Menu\BackGround.cs" />
+    <Compile Include="GameState\Menu\GameMenuState.cs" />
+    <Compile Include="GameState\Menu\Items\ChangeOption.cs" />
+    <Compile Include="GameState\Menu\Items\Start.cs" />
+    <Compile Include="GameState\Menu\Option.cs" />
+    <Compile Include="Entities\Players\Player.cs" />
+    <Compile Include="GameState\Stage1\BackGround.cs" />
+    <Compile Include="GameState\Stage1\ForeTable.cs" />
+    <Compile Include="GameState\Stage1\GameView.cs" />
+    <Compile Include="GameState\Stage1\Stage1State.cs" />
+    <Compile Include="Input.cs" />
+    <Compile Include="RenderLevel.cs" />
+    <Compile Include="Sound.cs" />
+    <Compile Include="SoundManagerEx.cs" />
+    <Compile Include="States\SoundTestState.cs" />
+    <Compile Include="Extra\Sprite.cs" />
+    <Compile Include="Extra\Structs.cs" />
+    <Compile Include="States\DrawSpriteState.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extra\IGameObject.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="States\SplashScreenState.cs" />
+    <Compile Include="States\StateSystem.cs" />
+    <Compile Include="States\TestSpriteClassSate.cs" />
+    <Compile Include="States\TextTestState.cs" />
+    <Compile Include="Extra\TextFont.cs" />
+    <Compile Include="Extra\TextureManager.cs" />
+    <Compile Include="States\TitleMenuState.cs" />
+    <Compile Include="States\WaveformGraphState.cs" />
+    <Compile Include="Extra\Tween.cs" />
+    <Compile Include="Extra\Vector2D.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aaa" />
+    <None Include="Resources\kaguya" />
+    <None Include="Resources\_1.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\x86\Debug\res\Audio\ME\001-Victory01.mid" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\x86\Debug\res\Audio\BGS\001-Wind01.ogg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\x86\Debug\res\Audio\BGM\竹取飞翔~静~.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\_11.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aaa.jpg" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
