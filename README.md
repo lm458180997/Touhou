@@ -1,2 +1,2 @@
 # Touhou
-2D game engion
+东方STG同人游戏及2D游戏开发引擎
