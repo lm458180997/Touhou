@@ -9,6 +9,9 @@ namespace FastLoopExample
     public class Effect
     {
         public Vector2D Position;
+        public Sprite[] Sprites;               //仅用一次的sprite组
+        public bool working = true;            //是否正常工作中
+        public bool disposed = false;          //是否可以被注销
         public Sprite sprite;                  //静止的特效专用的sprite
         public MultiSprite multisprite;        //动态特效专用的multisprite
         public const float per_512 = 0.015625f, per_256 = 0.03125f;

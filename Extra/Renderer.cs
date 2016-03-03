@@ -84,6 +84,14 @@ namespace FastLoopExample
             Gl.glRotatef(-rad, 0, 0, 1);
             Gl.glTranslatef(-(float)x, -(float)y, 0);
         }
+        public void DrawString(string str)
+        {
+            int lists;
+            
+
+
+        }
+
 
         /*  使用 batch （批）   */
         /*

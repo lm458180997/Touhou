@@ -189,7 +189,7 @@ namespace FastLoopExample.GameState.Menu.Items
 
             if (Input.getKeyDown("Space"))
             {
-                soundmanager.Play("002-System02.ogg");
+                soundmanager.Play("002-System02");
                 if (CurrentState == SelectState.quit)
                 {
                     Option.Command = Menu_Command.OptionChanged;
@@ -201,7 +201,7 @@ namespace FastLoopExample.GameState.Menu.Items
                 if (CurrentState != SelectState.volume)
                 {
                     CurrentState--;
-                    soundmanager.Play("002-System02.ogg");
+                    soundmanager.Play("002-System02");
                     if (CurrentState == SelectState.volume)
                     {
                         _volume.Selected = true;
@@ -217,7 +217,7 @@ namespace FastLoopExample.GameState.Menu.Items
                 if (CurrentState != SelectState.quit)
                 {
                     CurrentState++;
-                    soundmanager.Play("002-System02.ogg");
+                    soundmanager.Play("002-System02");
                     if (CurrentState == SelectState.volume)
                     {
                         _volume.Selected = true;
@@ -235,7 +235,7 @@ namespace FastLoopExample.GameState.Menu.Items
                 if (CurrentState == SelectState.volume)
                 {
                     _volume.GoLeft();
-                    soundmanager.Play("002-System02.ogg");
+                    soundmanager.Play("002-System02");
                     soundmanager.Volume = _volume.Level * 10;
                 }
             }
@@ -244,7 +244,7 @@ namespace FastLoopExample.GameState.Menu.Items
                 if (CurrentState == SelectState.volume)
                 {
                     _volume.GoRight();
-                    soundmanager.Play("002-System02.ogg");
+                    soundmanager.Play("002-System02");
                     soundmanager.Volume = _volume.Level * 10;
                 }
             }

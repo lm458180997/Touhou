@@ -15,9 +15,6 @@ using System.IO;
 using System.Drawing.Imaging;
 using System.Threading;                  //使用bass音频库
 
-using MySQLDriverCS;                     //连接MySQL数据库
-
-
 namespace FastLoopExample
 {
 
@@ -53,10 +50,12 @@ namespace FastLoopExample
 
         public static Dictionary<string, People> Charactors = new Dictionary<string, People>();     //能操纵的所有角色
 
+        public FileManager filemanager ;      //本地资源管理器[1.0]
+        
         public Form1()
         {
             InitializeComponent();
-
+            
             //初始化bass库
             BassNet.Registration("leileimin@qq.com", "2X52314160022");
 
@@ -64,6 +63,7 @@ namespace FastLoopExample
             _fastloop = new FastLoop(GameLoop);            //绑定循环
             _openGLControl.Dock = DockStyle.Fill;          //保持为父容器填充
             _openGLControl.InitializeContexts();           //OpenGL初始化（比c++方便了不少）
+            filemanager = new FileManager();
 
             LoadingSetting();                              //读取用户设置
 
@@ -95,28 +95,7 @@ namespace FastLoopExample
             //loop.Start();
             
         }
-        string tititi = "null";
-        public void Read()
-        {
-            MySQLConnection conn = new MySQLConnection(new MySQLConnectionString(
-                "203.195.179.183:11567", "MyPictures", "cdb_outerroot", "leileimin318").AsString);
-            MySQLCommand cmd = new MySQLCommand("select * from PicUrl", conn);
-            conn.Open();
-            MySQLDataReader DBReader = cmd.ExecuteReaderEx();
-            try
-            {
-                while (DBReader.Read())
-                {
-                   // System.Diagnostics.Debug.Print("Host = {0}", DBReader.GetString(0));
-                    tititi = DBReader.GetString(0);
-                }
-            }
-            finally
-            {
-                DBReader.Close();
-                conn.Close();
-            } 
-        }
+        
 
         //需要把alut.dll, ILU.dll,OpenAL32.dll 复制到debug和release目录里
         void InitializeDisplay()
@@ -137,6 +116,27 @@ namespace FastLoopExample
 
         }
 
+
+        void ReadMusicFile(string path)
+        {
+            filemanager.ClearFiles();
+            filemanager.ReadFileClip(path);
+            string name = "";
+            if (filemanager.FilesDatas != null)
+                foreach (FileData fdt in filemanager.FilesDatas)
+                {
+                    name = fdt.Name;
+                    name = name.Substring(0, name.Length - 4);
+                    unsafe
+                    {
+                        byte[] test = fdt.filedata;
+                        GCHandle hObject = GCHandle.Alloc(test, GCHandleType.Pinned);
+                        IntPtr pObject = hObject.AddrOfPinnedObject();
+                        _soundManagerEx.AddSound(name, pObject, test.LongLength);
+                    }
+                }
+            filemanager.ClearFiles();
+        }
         void InitializeSounds()
         {
             
@@ -145,83 +145,148 @@ namespace FastLoopExample
                 MessageBox.Show("Bass 初始化出错！" + Bass.BASS_ErrorGetCode().ToString());
             }
             Datas.SoundManager_Static = _soundManagerEx;                 //将其保存至共享资源内
-            _soundManager.LoadSound("mymusic1", "BadApple.wav");
-            _soundManagerEx.AddSound("mymusic1", "BadApple.wav");
-            _soundManagerEx.AddSound("rj", "res\\溶解.mp3");
-            _soundManagerEx.AddSound("Accept Bloody Fate", "res\\Audio\\BGM\\Accept Bloody Fate.mp3");
-            _soundManagerEx.AddSound("Graze","res\\Audio\\SE\\se_graze.wav");
+            #region oldloadmusic
+            // _soundManager.LoadSound("mymusic1", "BadApple.wav");
+           // _soundManagerEx.AddSound("mymusic1", "BadApple.wav");
+           // _soundManagerEx.AddSound("rj", "res\\溶解.mp3");
+           // _soundManagerEx.AddSound("Accept Bloody Fate", "res\\Audio\\BGM\\Accept Bloody Fate.mp3");
+            //_soundManagerEx.AddSound("Graze","res\\Audio\\SE\\se_graze.wav");
+            #endregion
+            ReadMusicFile("msc.tg");
 
             #region ME
 
-            unsafe
-            {
-                byte[] test = FastLoopExample.Properties.Resources.竹取飞翔_静_;
-                GCHandle hObject = GCHandle.Alloc(test, GCHandleType.Pinned);
-                IntPtr pObject = hObject.AddrOfPinnedObject();
-                _soundManagerEx.AddSound("victor01", pObject, test.LongLength);
-            }
+            //unsafe
+            //{
+            //    byte[] test = FastLoopExample.Properties.Resources.竹取飞翔_静_;
+            //    GCHandle hObject = GCHandle.Alloc(test, GCHandleType.Pinned);
+            //    IntPtr pObject = hObject.AddrOfPinnedObject();
+            //    _soundManagerEx.AddSound("victor01", pObject, test.LongLength);
+            //}
             
             #endregion
 
             #region SE
-
-            _soundManagerEx.AddSound("002-System02.ogg", "res\\Audio\\SE\\002-System02.ogg");
-
+            //_soundManagerEx.AddSound("002-System02.ogg", "res\\Audio\\SE\\002-System02.ogg");
             #endregion
         }
-
-        void InitializeTextures()
+        void ReadTextureFile(string path)
         {
-            _textureManager.LoadTexture("huiye", "_1.bmp");    //也可以读取png图片，不支持alpha(会默认为黑色)
-            _textureManager.LoadTexture("huiye2", "enemy2.png");
-            _textureManager.LoadTexture("Font", "ascii.png");
-            _textureManager.LoadTexture("charactor1", "charactor1.png");
-            _textureManager.LoadTexture("mbit1", "mbit1.bmp");
-            _textureManager.LoadTexture("foretable1", "res\\a.jpg");
-            _textureManager.LoadTexture("lura1", "res\\lura1_.jpg");
-            _textureManager.LoadTexture("menu1", "res\\menu.png");
-            _textureManager.LoadTexture("menu2", "res\\menu2.jpg");
-
-            _textureManager.LoadTexture("Title_01", "res\\Titles\\title01.png");
-            _textureManager.LoadTexture("logo1", "res\\Titles\\logo1.png");
-            _textureManager.LoadTexture("smile", "smile.jpg");
-            _textureManager.LoadTexture("stg1bg", "res\\background\\stg1bg.png");
-            _textureManager.LoadTexture("shade1", "res\\background\\shade1.png");
-            _textureManager.LoadTexture("table1", "res\\background\\table1.png");
-            _textureManager.LoadTexture("front00", "res\\Texts\\front00.png");
-            _textureManager.LoadTexture("front", "res\\Texts\\front.png");
-            _textureManager.LoadTexture("fontex", "res\\Texts\\ascii1.png");     //Bonus_Font
-            _textureManager.LoadTexture("Player00", "res\\Characters\\pl00.png");
-            _textureManager.LoadTexture("Player2", "res\\Characters\\player2.png");
-            _textureManager.LoadTexture("enemys1", "res\\Enemy\\enemys1.png");
-            _textureManager.LoadTexture("enemy", "res\\Enemy\\enemy.png");
-
-            _textureManager.LoadTexture("etama1", "res\\Bullet\\etama.png");
-            _textureManager.LoadTexture("etama2", "res\\Bullet\\etama1.png");
-            _textureManager.LoadTexture("Rays", "res\\Bullet\\etama9.png");
-            _textureManager.LoadTexture("Ef_etama2", "res\\Effects\\etama1.png");
-            _textureManager.LoadTexture("etama6", "res\\Effects\\etama6.png");
-
-            //可以利用这种， 将压缩的byte[] 换成文件，再通过文件来制作纹理，最后在删除 的这种绕大圈的方式来制作隐藏的纹理
-            //超费时间，超费资源。。。。但至少能跑
-            unsafe
+            filemanager.ClearFiles();
+            filemanager.ReadFileClip(path);
+            string name = "";
+            string extens = "";
+            if(filemanager.FilesDatas!=null)
+            foreach (FileData fdt in filemanager.FilesDatas)
             {
-                byte[] bytes = FastLoopExample.Properties.Resources.aaa1;
-                Stream stream = BytesToStream(bytes);
-                StreamToFile(stream, "pic.jpg");
-                _textureManager.LoadTexture("new pic", "pic.jpg");
-                if (File.Exists("pic.jpg"))
+                name = fdt.Name;
+                extens = Path.GetExtension(name);
+                name = Path.GetFileNameWithoutExtension(name);
+                switch (extens)
                 {
-                    File.Delete("pic.jpg");
+                    case ".png":
+                        _textureManager.LoadTexture(name, Il.IL_PNG, fdt.filedata, fdt.bodyLength + 1);
+                        break;
+                    case ".jpg":
+                        _textureManager.LoadTexture(name, Il.IL_JPG, fdt.filedata, fdt.bodyLength + 1);
+                        break;
+                    case ".bmp":
+                        _textureManager.LoadTexture(name, Il.IL_BMP, fdt.filedata, fdt.bodyLength + 1);
+                        break;
                 }
             }
+            filemanager.ClearFiles();
+        }
+        void InitializeTextures()
+        {
+            //此处需要判定时候存在文件exit"defuu.tg"
+            ReadTextureFile("defuu.tg");
+            #region oldLoadTexture
+            //_textureManager.LoadTexture("huiye", "_1.bmp");    //也可以读取png图片，不支持alpha(会默认为黑色)
+            //_textureManager.LoadTexture("huiye2", "enemy2.png");
+            //_textureManager.LoadTexture("Font", "ascii.png");
+            //_textureManager.LoadTexture("charactor1", "charactor1.png");
+            //_textureManager.LoadTexture("mbit1", "mbit1.bmp");
+            //_textureManager.LoadTexture("foretable1", "res\\a.jpg");
+            //_textureManager.LoadTexture("lura1", "res\\lura1_.jpg");
+            //_textureManager.LoadTexture("menu1", "res\\menu.png");
+            //_textureManager.LoadTexture("menu2", "res\\menu2.jpg");
+            #endregion
+            ReadTextureFile("Txafr.tg");
+            #region oldLoadTexture2
+            //_textureManager.LoadTexture("Title_01", "res\\Titles\\title01.png");
+            //_textureManager.LoadTexture("logo1", "res\\Titles\\logo1.png");
+            //_textureManager.LoadTexture("smile", "smile.jpg");
+            //_textureManager.LoadTexture("stg1bg", "res\\background\\stg1bg.png");
+            //_textureManager.LoadTexture("shade1", "res\\background\\shade1.png");
+            //_textureManager.LoadTexture("table1", "res\\background\\table1.png");
+            //_textureManager.LoadTexture("front00", "res\\Texts\\front00.png");
+            //_textureManager.LoadTexture("front", "res\\Texts\\front.png");
+            //_textureManager.LoadTexture("Player00", "res\\Characters\\pl00.png");
+            //_textureManager.LoadTexture("Player2", "res\\Characters\\player2.png");
+            //_textureManager.LoadTexture("Wriggle", "res\\Characters\\Wriggle.png");   //莉格露皮肤
+            //_textureManager.LoadTexture("enemys1", "res\\Enemy\\enemys1.png");
+            //_textureManager.LoadTexture("enemy", "res\\Enemy\\enemy.png");
+            #endregion
+            ReadTextureFile("etama.tg");
+            #region oldLoadTexture3
+            //_textureManager.LoadTexture("etama1", "res\\Bullet\\etama.png");
+            //_textureManager.LoadTexture("etama2", "res\\Bullet\\etama1.png");  //[否决]
+            //_textureManager.LoadTexture("Rays", "res\\Bullet\\etama9.png");
+            //_textureManager.LoadTexture("Ef_etama2", "res\\Effects\\etama1.png");
+            //_textureManager.LoadTexture("etama6", "res\\Effects\\etama6.png"); //[否决]
+            #endregion
+            ReadTextureFile("fts.tg");
+            #region oldLoadTexture4
+            //_textureManager.LoadTexture("FontAciP1", "res\\Fonts\\Aci_P1.png");
+            //_textureManager.LoadTexture("FontAciP2", "res\\Fonts\\Aci_P2.png");
+            //_textureManager.LoadTexture("FontAciP3", "res\\Fonts\\Aci_P3.png");
+            //_textureManager.LoadTexture("FontAciP4", "res\\Fonts\\Aci_P4.png");
+            //_textureManager.LoadTexture("FontAciP5", "res\\Fonts\\Aci_P5.png");
+            #endregion
+            ReadTextureFile("stlg.tg");
+            #region oldLoadTexture5
+            // _textureManager.LoadTexture("st01logo", "res\\Texts\\st01logo.png");
 
+            System.Resources.ResourceManager mng = FastLoopExample.Properties.Resources.ResourceManager;
+            object obj = mng.GetObject("mypic");
+            Image img = obj as Image;
+            //.....drawImage(image);
+
+
+            //内存块中读取
+            //_textureManager.LoadTexture
+            //    ("justtest", Il.IL_BMP, FastLoopExample.Properties.Resources.kaguya, 25950*24);
+
+            ////可以利用这种， 将压缩的byte[] 换成文件，再通过文件来制作纹理，最后在删除 的这种绕大圈的方式来制作隐藏的纹理
+            ////超费时间，超费资源。。。。但至少能跑
+            //unsafe
+            //{
+            //    byte[] bytes = FastLoopExample.Properties.Resources.aaa1;
+            //    Stream stream = BytesToStream(bytes);
+            //    StreamToFile(stream, "pic.jpg");
+            //    _textureManager.LoadTexture("new pic", "pic.jpg");
+            //    if (File.Exists("pic.jpg"))
+            //    {
+            //        File.Delete("pic.jpg");
+            //    }
+            //}
+            #endregion
+
+            ReadTextureFile("res\\Wriggle\\WriggleAttack1.tg");
+            ReadTextureFile("res\\Wriggle\\RushBlue.tg");
+            ReadTextureFile("res\\Wriggle\\WindBlue_Reimu_Ef.tg");
+            ReadTextureFile("res\\Wriggle\\RushRed_Reimu_EF.tg");
+            // ReadTextureFile("res\\Remilia\\GodGun.tg");    //神枪
+            ReadTextureFile("res\\Effect\\Ef_flash1_.tg");
+            ReadTextureFile("res\\Effect\\Thunder_White.tg");
         }
 
         void InitializeGameCharactors()
         {
             Datas.Charactors.Add("ReiMu",new ReiMu(_textureManager));
             Datas.Charactors.Add("YuKaRi", new Yukari(_textureManager));
+            Datas.Charactors.Add("Wriggle", new Wriggle(_textureManager));
         }
 
         void InitializeGameState()
@@ -313,6 +378,15 @@ namespace FastLoopExample
                                         Datas.booms = v;
                                     }
                                 }
+                                if (name == "Replay")
+                                {
+                                    string value = arr[i].Substring(j + 1, carr.Length - j - 1);
+                                    int v = Convert.ToInt32(value);
+                                    if (v == 1)
+                                    {
+                                        Datas.ReFre = true;
+                                    }
+                                }
                                 break;
                             }
                         }
@@ -335,6 +409,8 @@ namespace FastLoopExample
 
         long workingcount = 0;
         long errorcount = 0;
+
+        bool slow = false;
 
         void GameLoop(double elapsedTime)
         {
@@ -385,35 +461,33 @@ namespace FastLoopExample
                 timecaculate -= per_fps;
                 _system.Render();
                 _openGLControl.Refresh();
-                if (sc > 0.00001)
+                if (sc > 0.0001)
                 {
                     errorcount++;
                     timecaculate = 0;
                 }
-
-                _system.Update(per_fps);
-                _soundManagerEx.Update();        //声音控制器逻辑更新
-
-                if (timc <= 0.1)
-                {
-                    refreshtick++;
-                }
                 else
                 {
-                    refreshtick++;
-                    double fpps = refreshtick / timc;
-                    //System.Diagnostics.Debug.Print("count: " + refreshtick.ToString() + "time:" + timc.ToString()
-                    //+ "fps:" + fpps.ToString());
-                    fpps = (double)errorcount / workingcount;
-                    //System.Diagnostics.Debug.Print("处理落率：" + fpps.ToString());
-                    fpps = 0;
-                    timc = 0;
-                    refreshtick = 0;
+                    _system.Update(per_fps);
                 }
+                this.Text = sc.ToString("f9");
+                _soundManagerEx.Update();        //声音控制器逻辑更新
+                //if (timc <= 0.1)
+                //    refreshtick++;
+                //else
+                //{
+                //    refreshtick++;
+                //    double fpps = refreshtick / timc;
+                //    //System.Diagnostics.Debug.Print("count: " + refreshtick.ToString() + "time:" + timc.ToString()
+                //    //+ "fps:" + fpps.ToString());
+                //    fpps = (double)errorcount / workingcount;
+                //    //System.Diagnostics.Debug.Print("处理落率：" + fpps.ToString());
+                //    fpps = 0;
+                //    timc = 0;
+                //    refreshtick = 0;
+                //}
             }
             #endregion
-
-
         }
 
 
@@ -482,7 +556,6 @@ namespace FastLoopExample
                     keys[str].value = true;                //已经按下了
                 }
             }
-
             Keys ks = Keys.A;
             for (; ks <= Keys.Z; ks++)
                 if (e.KeyCode == ks)

@@ -470,28 +470,28 @@ namespace FastLoopExample
 
         public override void Render()
         {
-            if (Position.Y < 400)
+            if (Position.Y < 450)
             {
                 sprite.SetPosition(Position.X, Position.Y);
                 Stage1State._renderer.DrawSprite(sprite);
             }
             else
             {
-                sprite.SetPosition(Position.X, 400);
+                sprite.SetPosition(Position.X, 450);
                 Stage1State._renderer.DrawSprite(littleState);
             }
         }
 
         public override void Render(Renderer renderer)
         {
-            if (Position.Y < 400)
+            if (Position.Y < 450)
             {
                 sprite.SetPosition(Position.X, Position.Y);
                 renderer.DrawSprite(sprite);
             }
             else
             {
-                sprite.SetPosition(Position.X, 400);
+                sprite.SetPosition(Position.X, 450);
                 renderer.DrawSprite(littleState);
             }
         }
@@ -925,5 +925,9 @@ namespace FastLoopExample
             return NumberDic[key];
         }
     }
+
+    
+
+
 
 }

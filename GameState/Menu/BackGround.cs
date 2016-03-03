@@ -33,6 +33,8 @@ namespace FastLoopExample.GameState.Menu
             BackGroundImage = new Dictionary<int, Sprite>();
             BackGroundImage.Add(_MAINMENU_, new Sprite());
             BackGroundImage.Add(_START_, new Sprite());
+
+          //  BackGroundImage[_MAINMENU_].Texture = this._texturemanager.Get("justtest");
             BackGroundImage[_MAINMENU_].Texture = this._texturemanager.Get("menu1");
             BackGroundImage[_START_].Texture = this._texturemanager.Get("menu2");
 

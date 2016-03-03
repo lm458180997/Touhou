@@ -14,6 +14,24 @@ namespace FastLoopExample
 {
     public class Stage1State : IGameObject
     {
+        //int totolTick = 0;
+        //int tick = 0;
+        //int interval = 60;
+        //System.IO.StreamWriter writer ;
+        //List<string> datas= new List<string>();
+        //void toolupdate()
+        //{
+        //    totolTick++;
+        //    tick++;
+        //    if (tick == interval)
+        //    {
+        //        tick = 0;
+        //        datas.Add("tick:"+totolTick.ToString()+ "   "+ GamePlayer.Position.ToString());
+        //    }
+
+        //}
+
+
 
         public static Renderer _renderer = new OffsetRenderder(-100,-225); // 着色顶点进行了偏移
         public static Renderer _renderer_normal = new Renderer();          // 普通的着色器
@@ -65,6 +83,11 @@ namespace FastLoopExample
         public static double GameTime;             //当前的游戏时间
 
         public Sprite Logo;       //游戏LOGO
+        public FastLoopExample.Extra.VariableSprite  test;  //可变Sprite
+
+
+        FontAciHuaKang fonc; //文字库（测试）
+        FontWriterTool TextWriter;//  文字库使用工具（测试）
 
         /// <summary>
         /// 游戏中，所进行的游戏的所有任务（什么时候出现怪，什么时候进入boss模式等等）;
@@ -82,7 +105,6 @@ namespace FastLoopExample
             if(form != null)
             this.form = form;
 
-           
             GamePlayer = new Player();
             Datas.CurrentPlayer = GamePlayer;
 
@@ -90,7 +112,7 @@ namespace FastLoopExample
             GamePlayer.RegisteredRCharactors(Datas.Charactors[Datas.Fore_People_Select],
               Datas.Charactors[Datas.Fore_People_Select]);//  Form1.Charactors[Datas.Back_People_Select]);
             GamePlayer.Position.Y = 30;
-            GamePlayer.RenderSpeed = 0.15f;
+            GamePlayer.RenderSpeed = 0.075f;                            //人物帧动画渲染速度
 
             foretable = new ForeTable(texturemanager, 10);          //最前层着色
 
@@ -109,7 +131,13 @@ namespace FastLoopExample
             Logo.SetHeight(192);
             Logo.SetPosition(210, -130);
 
+            test = new Extra.VariableSprite();
+            test.BindSprite(Logo);
+            test.SetAttribute(210, -130, 0, 192, 192);
 
+
+            fonc = new FontAciHuaKang(texturemanager);
+            TextWriter = new FontWriterTool(fonc);
         }
 
         public int Hp
@@ -156,7 +184,7 @@ namespace FastLoopExample
 
         public void Start()
         {
-            _soundmanager.Play("Accept Bloody Fate");
+            _soundmanager.Play("rj");
             _particles = new Particle.FlyingFlowersParticles(_textureManager);
             _breakParticles = new Particle.BreakPointsParticles(_textureManager);
             background = new BackGround(_textureManager, 0, _particles);        //着色等级为0级（顶层着色）
@@ -290,25 +318,38 @@ namespace FastLoopExample
             GameTime = 0;
             Stage1_SystemCommands.Clear();
             AddCommands();                                   //添加按键命令
-            
+
+            background.SpeedY = 0.01f;     //初始速度
+
+            gameview.BeginStart();        //开始执行 
+            //gameview.ShowBGM("BGM:Silent Story（發熱巫女～ず）", 0.4f);      //显示BGM, 字体倍率为0.5f
+            _soundmanager.SetVolumChannel("Graze", 0.2f);   
         }
 
         //加载任务（游戏主核心）
         void AddCommands()
         {
-            TCset leftOut_120 = new TCset(120,"leftOut_120",false);    
+            TCset leftOut_120 = new TCset(120 + 300,"leftOut_120",false);    
             Stage1_SystemCommands.Add(leftOut_120);
-            TCset rightOut_120 = new TCset(120, "rightOut_120",false);
+            TCset rightOut_120 = new TCset(240 + 300+80, "rightOut_120", false);
             Stage1_SystemCommands.Add(rightOut_120);
-            TCset leftOut_240 = new TCset(240, "leftOut_240",false);
+            TCset leftOut_240 = new TCset(240 + 300, "leftOut_240", false);
             Stage1_SystemCommands.Add(leftOut_240);
-            TCset rightOut_240 = new TCset(240, "rightOut_240",false);
+            TCset rightOut_240 = new TCset(240 + 300+40, "rightOut_240", false);
             Stage1_SystemCommands.Add(rightOut_240);
 
-            TCset left_loop = new TCset(300,2000, "leftloop", false, true);
+            TCset left_loop = new TCset(1200,2000, "leftloop", false, true);
             Stage1_SystemCommands.Add(left_loop);
-            TCset right_loop = new TCset(300, 2000, "rightloop", false, true);
+            TCset right_loop = new TCset(1200, 2000, "rightloop", false, true);
             Stage1_SystemCommands.Add(right_loop);
+
+            //120帧后显示BGM
+            TCset ShowBGM = new TCset(120, "ShowBGM1", false);
+            Stage1_SystemCommands.Add(ShowBGM);
+            TCset BackSpeedChange1 = new TCset(350, "BackSpeedChange1", false);
+            Stage1_SystemCommands.Add(BackSpeedChange1);
+            TCset BackSpeedChange2 = new TCset(700, "BackSpeedChange2", false);
+            Stage1_SystemCommands.Add(BackSpeedChange2);
 
         }
 
@@ -324,8 +365,13 @@ namespace FastLoopExample
             foretable.Scores = (long)score;
             background.Update(elapsedTime);
             gameview.Update(elapsedTime);
+
+            ///////////////////////////测试/////////////////////////////////////
+           // toolupdate();
+            ///////////////////////////////////////////////////////////////////
         }
 
+        //键盘任务
         void KeyDownEvent()
         {
             # region KeyDownEvents
@@ -415,10 +461,12 @@ namespace FastLoopExample
             if (Input.getKeyDown("X"))
             {
                 Booms--;
+                GamePlayer.Attack();
             }
             if (Input.getKeyDown("Z"))
             {
                 GamePlayer.StartFire();
+               // GamePlayer.Attack();
                 Datas.Commands.Add("$ZDown#" + GameTime.ToString());
             }
             if (Input.getKeyUp("Z"))
@@ -429,6 +477,15 @@ namespace FastLoopExample
             if (Input.getKeyDown("Escape"))
             {
                 Datas.PrintData();
+                //writer = new System.IO.StreamWriter("data.txt");
+                //writer.WriteLine(DateTime.Now.ToString());
+                //foreach (string s in datas)
+                //{
+                //    writer.WriteLine(s);
+                //}
+                //writer.Close();
+                //writer.Dispose();
+
             }
             if (Input.getKeyDown("H"))
             {
@@ -464,89 +521,126 @@ namespace FastLoopExample
             #endregion
         }
 
-        //自动实现按键命令
+        //自动实现按键命令（方向的定义需要集中进行，否则同帧任务操作的时候会出现bug）
         void aotoKeyEvent()
         {
-            for (int i = 0; i < commands.Count; i++)
-            {
-                if (commands[i].useable)
+            bool[] DirCommands = new bool[8];
+            for (int i = 0; i < 8; i++)
+                DirCommands[i] = false;
+
+                for (int i = 0; i < commands.Count; i++)
                 {
-                    if (GameTime == commands[i].caculateTime)
+                    if (commands[i].useable)
                     {
-                        TCset cmd = commands[i];
-                        if (cmd.useable)
+                        if (GameTime == commands[i].caculateTime)
                         {
-                            #region 命令控制
-                            switch (cmd.Name)
+                            TCset cmd = commands[i];
+                            if (cmd.useable)
                             {
-                                case "LeftDown":
-                                    neednormalize = true;
-                                    keydowning[Left] = true;
-                                    direction.X = -1;
-                                    break;
-                                case "LeftUp": neednormalize = true;
-                                    keydowning[Left] = false;
-                                    if (keydowning[Right])
-                                        direction.X = 1;
-                                    else
-                                        direction.X = 0;
-                                    break;
-                                case "RightDown": neednormalize = true;
-                                    keydowning[Right] = true;
-                                    direction.X = 1;
-                                    break;
-                                case "RightUp": neednormalize = true;
-                                    keydowning[Right] = false;
-                                    if (keydowning[Left])
-                                        direction.X = -1;
-                                    else
-                                        direction.X = 0;
-                                    break;
-                                case "UpDown": neednormalize = true;
-                                    keydowning[Up] = true;
-                                    direction.Y = 1;
-                                    break;
-                                case "UpUp": neednormalize = true;
-                                    keydowning[Up] = false;
-                                    if (keydowning[Down])
-                                        direction.Y = -1;
-                                    else
-                                        direction.Y = 0;
-                                    break;
-                                case "DownDown": neednormalize = true;
-                                    keydowning[Down] = true;
-                                    direction.Y = -1;
-                                    break;
-                                case "DownUp":
-                                    neednormalize = true;
-                                    keydowning[Down] = false;
-                                    if (keydowning[Up])
-                                        direction.Y = 1;
-                                    else
-                                        direction.Y = 0;
-                                    break;
-                                case "ShiftDown": GamePlayer.IsFast = false;
-                                    break;
-                                case "ShiftUp": GamePlayer.IsFast = true;
-                                    break;
-                                case "ZUp": GamePlayer.StopFire();
-                                    break;
-                                case "ZDown": GamePlayer.StartFire();
-                                    break;
-                                default:
-                                    break;
+                                #region 命令控制
+                                switch (cmd.Name)
+                                {
+                                    case "LeftDown":
+                                        neednormalize = true;
+                                        DirCommands[0] = true;
+                                        break;
+                                    case "LeftUp": neednormalize = true;
+                                        DirCommands[1] = true;
+                                        break;
+                                    case "RightDown": neednormalize = true;
+                                        DirCommands[2] = true;
+                                        break;
+                                    case "RightUp": neednormalize = true;
+                                        DirCommands[3] = true;
+                                        break;
+                                    case "UpDown": neednormalize = true;
+                                        DirCommands[4] = true;
+                                        break;
+                                    case "UpUp": neednormalize = true;
+                                        DirCommands[5] = true;
+                                        break;
+                                    case "DownDown": neednormalize = true;
+                                        DirCommands[6] = true;
+                                        break;
+                                    case "DownUp":
+                                        neednormalize = true;
+                                        DirCommands[7] = true;
+                                        break;
+                                    case "ShiftDown": GamePlayer.IsFast = false;
+                                        break;
+                                    case "ShiftUp": GamePlayer.IsFast = true;
+                                        break;
+                                    case "ZUp": GamePlayer.StopFire();
+                                        break;
+                                    case "ZDown": GamePlayer.StartFire();
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                #endregion
+                                cmd.useable = false;
                             }
-                            #endregion
-                            if (neednormalize)
-                            {
-                                GamePlayer.Direction = direction.GetNormalize();
-                                neednormalize = false;
-                            }
-                            cmd.useable = false;
                         }
                     }
                 }
-            }
+
+                if (neednormalize)
+                {
+                    if (DirCommands[0])
+                    {
+                        keydowning[Left] = true;
+                        direction.X = -1;
+                    }
+                    if (DirCommands[1])
+                    {
+                        keydowning[Left] = false;
+                        if (keydowning[Right])
+                            direction.X = 1;
+                        else
+                            direction.X = 0;
+                    }
+                    if (DirCommands[2])
+                    {
+                        keydowning[Right] = true;
+                        direction.X = 1;
+                    }
+                    if (DirCommands[3])
+                    {
+                        keydowning[Right] = false;
+                        if (keydowning[Left])
+                            direction.X = -1;
+                        else
+                            direction.X = 0;
+                    }
+                    if (DirCommands[4])
+                    {
+                        keydowning[Up] = true;
+                        direction.Y = 1;
+                    }
+                    if (DirCommands[5])
+                    {
+                        keydowning[Up] = false;
+                        if (keydowning[Down])
+                            direction.Y = -1;
+                        else
+                            direction.Y = 0;
+                    }
+                    if (DirCommands[6])
+                    {
+                        keydowning[Down] = true;
+                        direction.Y = -1;
+                    }
+                    if (DirCommands[7])
+                    {
+                        keydowning[Down] = false;
+                        if (keydowning[Up])
+                            direction.Y = 1;
+                        else
+                            direction.Y = 0;
+                    }
+                    GamePlayer.Direction = direction.GetNormalize();
+                    neednormalize = false;
+                }
         }
 
         /// <summary>
@@ -566,25 +660,37 @@ namespace FastLoopExample
                     }
                     if (tcs.useable)
                     {
+                        if (tcs.Name == "ShowBGM1")
+                        {
+                            gameview.ShowBGM("BGM:不安定的神", 0.5f);  
+                        }
                         if (tcs.Name == "leftOut_120")
                         {
-                            Enemy e = new Stage01_E01(_textureManager, -75, 450);
+                            Enemy e = new Stage1.Enemy01(_textureManager, -75, 450);
                             Enemys_ToAdd.Add(e);
                         }
                         else if (tcs.Name == "rightOut_120")
                         {
-                            Enemy e = new Stage01_E01(_textureManager, 75, 450);
+                            Enemy e = new Stage1.Enemy02_2(_textureManager, 125, 500, false);
                             Enemys_ToAdd.Add(e);
                         }
                         else if (tcs.Name == "leftOut_240")
                         {
-                            Enemy e = new Stage01_E01(_textureManager, -125, 500);
+                            Enemy e = new Stage1.Enemy02_2(_textureManager, -70, 500,false);
                             Enemys_ToAdd.Add(e);
                         }
                         else if (tcs.Name == "rightOut_240")
                         {
-                            Enemy e = new Stage01_E01(_textureManager, 125, 500);
+                            Enemy e = new Stage1.Enemy02_2(_textureManager, 125, 500, true);
                             Enemys_ToAdd.Add(e);
+                        }
+                        else if (tcs.Name == "BackSpeedChange1")
+                        {
+                            background.SpeedY = 0.04f;
+                        }
+                        else if (tcs.Name == "BackSpeedChange2")
+                        {
+                            background.SpeedY = 0.06f;
                         }
                         tcs.useable = false; //一次性任务
                     }
@@ -734,7 +840,7 @@ namespace FastLoopExample
             }
             Enemys_Bullets_toRemove.Clear();
 
-            //敌人子弹的碰撞判定
+            //敌人子弹的碰撞判定 && 技能检测
             foreach (Bullet b in Enemys_Bullets)
             {
                 //先判定擦弹，再判定碰撞
@@ -758,6 +864,17 @@ namespace FastLoopExample
                         Datas.booms = Booms;
                     }
                 }
+                //玩家技能检测(ComponentMessage)
+                MessageManager msg = new MessageManager();
+                if (GamePlayer.AttackCollision(b, ref msg))
+                {
+                    CmpMessage[] mss = msg.SelectMessages(CmpMessage.CollisionMasseageNormal);
+                    foreach (CmpMessage ms in mss)
+                    {
+                        b.AcceptMessage(ms);
+                    }
+                }
+
                 if (b.disabled == true)                 //子弹销毁
                 {
                     Enemys_Bullets_toRemove.Add(b);
@@ -865,16 +982,38 @@ namespace FastLoopExample
             else
             {
                 aotoKeyEvent();                  //自动实现命令
+                ///////////////
+                //if (Input.getKeyDown("Escape"))
+                //{
+                //    writer = new System.IO.StreamWriter("data.txt");
+                //    writer.WriteLine(DateTime.Now.ToString());
+                //    foreach (string s in datas)
+                //    {
+                //        writer.WriteLine(s);
+                //    }
+                //    writer.Close();
+                //    writer.Dispose();
+                //}
+                ///////////////
             }
 
             RunCommands();
 
             EntitiesUpdate(elapsedTime);
-
+           
             GamePlayer.particle_collider.Collition(_particles, elapsedTime);     //粒子的碰撞
 
-        }
 
+            //calc++;
+            //percent = calc / 360;
+            //if (percent > 1)
+            //   percent = 1;
+            //test.SetAttribute(210, -130, percent);
+            //test.SetColorVol(new Color(1, 1, 1, 1), new Color(1, 1, 1, percent * percent * percent));
+        }
+        float calc = 0;
+        float percent = 0;
+        
         public void Render()
         {
             Gl.glShadeModel(Gl.GL_LINE_SMOOTH);
@@ -897,9 +1036,23 @@ namespace FastLoopExample
             }
 
             //绘画logo
-            _renderer_normal.DrawSprite(Logo);
+            //_renderer_normal.DrawSprite(Logo);
 
+            _renderer_normal.DrawSprite(test.GetSprite());
 
+            //写文字（测试）
+            //if (percent <= 0.5)
+            //{
+            //    TextWriter.DrawString(_renderer, "操作键说明:Z键攻击     ",
+            //        -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 2 * percent);
+            //}
+            //else
+            //{
+            //    TextWriter.DrawString(_renderer, "操作键说明:Z键攻击     ",
+            //        -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 2 * (1-percent));
+            //}
+            //TextWriter.DrawString(_renderer, GamePlayer.Position.ToString(),
+            //        -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 1);
             Gl.glFinish();
         }
     }

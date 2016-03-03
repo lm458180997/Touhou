@@ -28,6 +28,18 @@ namespace FastLoopExample
         double unbeatable_time = 0;        //处于无敌时间的计时器（大于0时处于无敌）
         Effect SlowMoveEffect;             //慢速位移的特效（需要先注册特效）
         public ParticleColiiders.ParticleCollider particle_collider;         //粒子的碰撞器（一般为弹射碰撞）
+        //xxx连击判定
+        ATKSTATETYPE attackState = ATKSTATETYPE.None; //当前攻击状态
+        float attackRefreshTime = 0.3f;                  //连续攻击刷新时间（用于连击后）
+        double attackCaculateTime = 0;                //连续攻击的计算时间
+        double attackCD = 0.3f;                          //最短间隔CD （用于两个"多次攻击"之间的间隔）
+        double attackCDCaculate = 0;                  //CD记录计时器
+
+        protected int SkillPower=0;        //技能能量值（显示于能量槽中）
+        protected int SkillPowerMax = 150; //技能能量值的最大值
+
+        bool allowAttackRush = true;       //是否允许技能进攻（能量值不足时，不到冷却时间结束不允许再次技能）
+        //xxx连击判定
 
         public Player()
         {
@@ -101,21 +113,16 @@ namespace FastLoopExample
         public override void Render()
         {
             base.Render();
-            //对人物进行绘画
-            Sprite sp = CurrentCharactor.sprite;
-            sp.SetPosition(Position.X, Position.Y);
-
             if (unbeatable)
             {
-                sp.SetColorUp(new Color(1, 1, 1, 0.5f));
-                sp.SetColorDown(new Color(1, 1, 1, 0.5f));
+                CurrentCharactor.SetColor(new Color(1, 1, 1, 0.5f), new Color(1, 1, 1, 0.5f));
             }
             else
             {
-                sp.SetColorUp(new Color(1, 1, 1, 1));
-                sp.SetColorDown(new Color(1, 1, 1, 1));
+                CurrentCharactor.SetColor(new Color(1, 1, 1, 1), new Color(1, 1, 1, 1));
             }
-            Stage1State._renderer.DrawSprite(sp);
+
+            CurrentCharactor.Render(Stage1State._renderer, Position);
 
             if(!isfast)
                SlowMoveEffect.Render(Stage1State._renderer);            //执行慢速特效
@@ -227,12 +234,31 @@ namespace FastLoopExample
             }
             #endregion
 
+            #region AttackRush
+            UpdateAttack(elapsedTime);
+
+            #endregion
+
             //Fire
             if (fireing)
             {
                 Fire(elapsedTime);
             }
 
+        }
+
+        public int GetSkillPower()
+        {
+            return SkillPower;
+        }
+
+        public void GetSkillPower(int value)
+        {
+            SkillPower += value;
+            if(SkillPower > SkillPowerMax)
+            {
+                SkillPower = SkillPowerMax;
+            }
         }
 
         bool fireing = false;
@@ -318,6 +344,75 @@ namespace FastLoopExample
             return false;
         }
 
+        //更新连击（产生攻击间隔判定）
+        void UpdateAttack(double elapsedTime)
+        {
+            //如果一直保持某种攻击态，则过一段时间后状态还原
+            if (attackState != ATKSTATETYPE.None)
+            {
+                attackCaculateTime += elapsedTime;
+                if (attackCaculateTime > attackRefreshTime)
+                {
+                    attackCaculateTime = 0;
+                    attackState = ATKSTATETYPE.None;
+                }
+            }
+            //如果不允许重置攻击，则进行重置记录
+            if (allowAttackRush == false)
+            {
+                attackCDCaculate += elapsedTime;
+                if (attackCDCaculate >= attackCD)
+                {
+                    allowAttackRush = true;
+                    attackCDCaculate = 0;
+                }
+            }
+        }
+
+        //攻击连击
+        public void Attack()
+        {
+            //第一次
+            if (attackState == ATKSTATETYPE.None)
+            {
+                if (allowAttackRush)
+                {
+                    attackState = ATKSTATETYPE.First;
+                    //不允许一次较短时间内重复放出基础技能
+                    allowAttackRush = false;
+                }
+            }
+            //第二次触发一阶攻击
+            else if (attackState == ATKSTATETYPE.First)
+            {
+                attackState = ATKSTATETYPE.Second;
+                //攻击态复位
+                attackCaculateTime = 0;                
+            }
+            else if (attackState == ATKSTATETYPE.Second)
+            {
+                attackState = ATKSTATETYPE.Third;
+                //攻击态复位
+                attackCaculateTime = 0;
+            }
+            else if (attackState == ATKSTATETYPE.Third)
+            {
+                attackState = ATKSTATETYPE.Final;
+                //攻击态复位
+                attackCaculateTime = 0;
+            }
+            else if (attackState == ATKSTATETYPE.Final)
+            {
+                attackState = ATKSTATETYPE.None;
+                attackCaculateTime = 0;
+            }
+            CurrentCharactor.ChangeAttack(attackState,Position);
+        }
+        public bool AttackCollision(Bullet bullet, ref MessageManager msg)
+        {
+            return CurrentCharactor.AttackCollision(bullet, ref msg);
+        }
+
     }
 
     //所有人物的基类
@@ -336,6 +431,11 @@ namespace FastLoopExample
         protected bool allowfire = true;         //允许开火2
         public List<Bullet> bullets_toAdd = new List<Bullet>();       //释放子弹的列表(每帧由player类进行收集，然后统一处理)
         public float MissDistance = 10;          //擦弹的判定距离
+       
+        //about ATK
+        ATKSTATETYPE currentState = ATKSTATETYPE.None;
+        public List<CollisionComponent> AttackComponents = new List<CollisionComponent>();  //攻击组件
+        public List<CollisionComponent> AttackComponents_ToRemove = new List<CollisionComponent>(); //组件删除缓冲池
 
         //姓名属性
         public string Name
@@ -376,14 +476,94 @@ namespace FastLoopExample
         public virtual void Update(double elapsedTime)
         {
             multiSprite.Update(elapsedTime);
-            
+            AttackUpdate(elapsedTime);
         }
 
         //渲染方式， GameObject的实现必须，在每帧实现时必须调用其执行视图上的渲染
         public virtual void Render()
         {
-            
         }
+
+        public virtual void Render(Renderer renderer)
+        {
+            renderer.DrawSprite(sprite);
+            foreach (CollisionComponent c in AttackComponents)
+            {
+                c.Render(renderer);
+            }
+        }
+
+        public virtual void Render(Renderer renderer, Vector2D Pos)
+        {
+            sprite.SetPosition(Pos.X, Pos.Y);
+            renderer.DrawSprite(sprite);
+            foreach (CollisionComponent c in AttackComponents)
+            {
+                c.Render(renderer);
+            }
+        }
+        public virtual void SetColor(Color colorup, Color colordown)
+        {
+            sprite.SetColorUp(colorup);
+            sprite.SetColorDown(colordown);
+        }
+        public virtual void SetSize(float w, float h)
+        {
+            sprite.SetWidth(w);
+            sprite.SetHeight(h);
+        }
+
+        /// <summary>
+        /// 切换攻击形态
+        /// </summary>
+        /// <param name="state">更换的形态状态标记</param>
+        /// <param name="vct">技能所要追随的Vector2D组件</param>
+        public virtual void ChangeAttack(ATKSTATETYPE state,Vector2D vct)
+        {
+
+        }
+        /// <summary>
+        /// 对子弹的技能判定
+        /// </summary>
+        /// <param name="bullet">判定的子弹对象</param>
+        /// <param name="msg">返回的判定信息</param>
+        /// <returns>是否进入判定域</returns>
+        public virtual bool AttackCollision(Bullet bullet, ref MessageManager msg)
+        {
+            return false;
+        }
+        /// <summary>
+        /// 对敌人的技能判定
+        /// </summary>
+        /// <param name="e">判定的敌人对象</param>
+        /// <param name="msg">返回的判定信息</param>
+        /// <returns>是否进入判定域</returns>
+        public virtual bool AttackCollision(Enemy e, ref MessageManager msg)
+        {
+            return false;
+        }
+        /// <summary>
+        /// 技能攻击逻辑更新
+        /// </summary>
+        /// <param name="ElapsedTime">逻辑攻击帧差</param>
+        protected void AttackUpdate(double ElapsedTime)
+        {
+            foreach (CollisionComponent c in AttackComponents)
+            {
+                c.Update((float)ElapsedTime);
+                if (c.disabled)
+                {
+                    AttackComponents_ToRemove.Add(c);
+                }
+            }
+            foreach (CollisionComponent c in AttackComponents_ToRemove)
+            {
+                AttackComponents.Remove(c);
+            }
+            AttackComponents_ToRemove.Clear();
+        }
+
+      //  public virtual bool AttackCollision(Bullet b, msg , position...
 
     }
 
@@ -413,9 +593,11 @@ namespace FastLoopExample
         //等级0时候的发射计时器0
         TickTool Level0_Fire0;
         TickTool Level0_Fire1;
+        TextureManager texturemanager;
 
         public ReiMu(TextureManager texturemanager)
         {
+            this.texturemanager = texturemanager;
             name = "ReiMu";
             Texture texture = texturemanager.Get("Player2");
             sprite = new Sprite();
@@ -481,7 +663,6 @@ namespace FastLoopExample
         public override void Update(double elapsedTime)
         {
             base.Update(elapsedTime);
-            multiSprite.Update(elapsedTime);
         }
 
         public override void Fire(Vector2D positon , double elapsedTime)
@@ -516,6 +697,160 @@ namespace FastLoopExample
                         bullets_toAdd.Add(b);
                         Level0_Fire1.currentTick = 0;          //refresh
                     }
+                    break;
+            }
+        }
+
+        public override void ChangeAttack(ATKSTATETYPE state,Vector2D vct)
+        {
+            base.ChangeAttack(state,vct);
+            //生成一个攻击判定组件
+            //1阶技能组件
+            if (state == ATKSTATETYPE.First)
+            {
+                Entities.Players.WriggleCmp1 cmp = new Entities.Players.WriggleCmp1(texturemanager, vct,50);
+                AttackComponents.Add(cmp);
+            }
+            //2阶技能组件
+            if (state == ATKSTATETYPE.Second)
+            {
+                Entities.Players.WriggleCmp1 cmp = new Entities.Players.WriggleCmp1(texturemanager, vct);
+                AttackComponents.Add(cmp);
+            }
+            //3阶技能组件
+            if (state == ATKSTATETYPE.Third)
+            {
+                Entities.Players.WriggleCmp1 cmp = new Entities.Players.WriggleCmp1(texturemanager, vct);
+                AttackComponents.Add(cmp);
+            }
+            //最终技能组件
+            if (state == ATKSTATETYPE.Final)
+            {
+                Entities.Players.WriggleCmp1 cmp = new Entities.Players.WriggleCmp1(texturemanager, vct);
+                AttackComponents.Add(cmp);
+            }
+        }
+        public override bool AttackCollision(Bullet bullet, ref MessageManager msg)
+        {
+            //是否存在判定成功的情况
+            bool result = false;
+            //对每一个组件都进行目标判定，并获得反馈结果
+            foreach (CollisionComponent c in AttackComponents)
+            {
+               if( c.Collision(bullet, ref msg))
+                   result = true;
+            }
+            return result;
+        }
+
+    }
+
+    //莉格露 角色
+    public class Wriggle : People
+    {
+        //等级0时候的发射计时器0
+        TickTool Level0_Fire0;
+        TickTool Level0_Fire1;
+
+        public Wriggle(TextureManager texturemanager)
+        {
+            name = "Wriggle";
+            Texture texture = texturemanager.Get("Wriggle");
+            sprite = new Sprite();
+            sprite.Texture = texture;
+            sprite.SetWidth(32);
+            sprite.SetHeight(42);
+            sprite.SetColor(new Color(1, 1, 1, 0.2f));
+
+            multiSprite = new MultiSprite(sprite);
+
+            float offset = 0.01f;
+
+            RecTangleF[] rects = new RecTangleF[4];
+            for (int i = 0; i < 4; i++)
+                rects[i] = new RecTangleF(i * 8 * per_256, per_256, (i + 1) * 8 * per_256 - offset, 13 * per_256);
+            multiSprite.RegeditState(0, rects);      //将此rectangleF注册到0号state
+
+            rects = new RecTangleF[4];
+            for (int i = 0; i < 4; i++)
+                rects[i] = new RecTangleF(i * 8 * per_256, per_256, (i + 1) * 8 * per_256 - offset, 13 * per_256);
+            multiSprite.RegeditState(1, rects);      //将此rectangleF注册到1号state (过渡移动)
+
+            rects = new RecTangleF[4];
+            for (int i = 0; i < 4; i++)
+                rects[i] = new RecTangleF(i * 8 * per_256, per_256, (i + 1) * 8 * per_256 - offset, 13 * per_256);
+            multiSprite.RegeditState(2, rects);      //将此rectangleF注册到2号state (移动)
+
+            rects = new RecTangleF[4];
+            for (int i = 0; i < 4; i++)
+                rects[i] = new RecTangleF(i * 8 * per_256, per_256, (i + 1) * 8 * per_256 - offset, 13 * per_256);
+            multiSprite.RegeditState(3, rects);      //将此rectangleF注册到3号state (过渡移动，右)
+
+            rects = new RecTangleF[4];
+            for (int i = 0; i < 4; i++)
+                rects[i] = new RecTangleF(i * 8 * per_256, per_256, (i + 1) * 8 * per_256 - offset, 13 * per_256);
+            multiSprite.RegeditState(4, rects);      //将此rectangleF注册到4号state (移动)
+
+            multiSprite.RegeditCollection(1, 2);     //将1号动画连接到2号动画上
+            multiSprite.RegeditCollection(3, 4);     //将3号动画连接到4号动画上
+            multiSprite.State = 0;                   //将状态切换为3号state
+
+            InitComponents();
+        }
+
+        public override void InitComponents()
+        {
+            Level0_Fire0 = new TickTool(6);    //Level0 ,每6帧发射一次直线弹
+            Level0_Fire1 = new TickTool(12);    //Level0 ,每12帧发射一次跟踪弹*2
+        }
+
+        public override void RereshFire()
+        {
+            Level0_Fire0.currentTick = Level0_Fire0.allTick;
+        }
+
+        public override void Render()
+        {
+            base.Render();
+        }
+
+        public override void Update(double elapsedTime)
+        {
+            multiSprite.Update(elapsedTime);
+        }
+
+        public override void Fire(Vector2D positon, double elapsedTime)
+        {
+            Level0_Fire0.currentTick += 1;
+            Level0_Fire1.currentTick += 1;
+            switch (level)
+            {
+                case 0:                                      //等级0 时的发射表
+                    if (Level0_Fire0.currentTick >= Level0_Fire0.allTick)
+                    {
+                        Bullet b;
+                        b = new ReimuBullet_Dir(Stage1State._textureManager, new Vector2D(0, 1));
+                        b.Position.X = positon.X - 10;
+                        b.Position.Y = positon.Y + 10;
+                        bullets_toAdd.Add(b);
+                        b = new ReimuBullet_Dir(Stage1State._textureManager, new Vector2D(0, 1));
+                        b.Position.X = positon.X + 10;
+                        b.Position.Y = positon.Y + 10;
+                        bullets_toAdd.Add(b);
+                        Level0_Fire0.currentTick = 0;         //刷新发射帧数计时器
+                    }
+                    if (Level0_Fire1.currentTick >= Level0_Fire1.allTick)
+                    {
+                        Bullet b = new ReimuBullet_Follow(Stage1State._textureManager, new Vector2D(-1, 3).GetNormalize());
+                        b.Position.X = positon.X - 15;
+                        b.Position.Y = positon.Y + 10;
+                        bullets_toAdd.Add(b);
+                        b = new ReimuBullet_Follow(Stage1State._textureManager, new Vector2D(1, 3).GetNormalize());
+                        b.Position.X = positon.X + 15;
+                        b.Position.Y = positon.Y + 10;
+                        bullets_toAdd.Add(b);
+                        Level0_Fire1.currentTick = 0;          //refresh
+                    }
 
 
                     break;
@@ -523,6 +858,8 @@ namespace FastLoopExample
         }
 
     }
+
+
 
     //八云紫人物
     public class Yukari : People

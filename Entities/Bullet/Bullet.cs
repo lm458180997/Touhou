@@ -14,6 +14,62 @@ namespace FastLoopExample
         }
     }
 
+    //攻击信息盒，记录各种攻击的计算情况[攻击判定时的刷新时间]
+    public class AttackMessageBox
+    {
+        public int Kinds = 6;
+        public double[] CaculateTimes ;
+        public bool[] AllowAttack ;
+        public double[] TimeIntervals;
+        public AttackMessageBox(int kinds=6)
+        {
+            Kinds = kinds;
+            CaculateTimes = new double[kinds];
+            AllowAttack = new bool[kinds];
+            TimeIntervals = new double[Kinds];
+            for (int i = 0; i < kinds; i++)
+            {
+                TimeIntervals[i] = 1;       //每种状态的刷新时都默认为1秒
+                AllowAttack[i] = true;
+            }
+
+        }
+        /// <summary>
+        /// 打开端口
+        /// </summary>
+        /// <param name="p">索引值</param>
+        public void OpenPort(int p)
+        {
+            AllowAttack[p] = true;
+            CaculateTimes[p] = TimeIntervals[p];
+        }
+        /// <summary>
+        /// 关闭端口
+        /// </summary>
+        /// <param name="p">索引值</param>
+        public void ClosePort(int p)
+        {
+            AllowAttack[p] = false;
+            CaculateTimes[p] = 0;
+        }
+
+        public void Update(double elapsedTime)
+        {
+            for (int i = 0; i < Kinds; i++)
+            {
+                if (!AllowAttack[i])
+                {
+                    CaculateTimes[i] += elapsedTime;
+                    if (CaculateTimes[i] >= TimeIntervals[i])
+                    {
+                        AllowAttack[i] = true;
+                        CaculateTimes[i] = 0;
+                    }
+                }
+            }
+        }
+    }
+
     public class Bullet : Entity ,RenderLevel,Collider
     {
 
@@ -26,27 +82,29 @@ namespace FastLoopExample
         public bool fromenemy = true;    //是否属于敌人的子弹
         protected int MissTick = 60;     //计算擦弹的计时周期
         protected int MissRefresh = 60;  //擦弹的计时周期刷新时间
-
+        protected List<CmpMessage> ComponentMessages = new List<CmpMessage>(); //记录组件的所接受到的所有信息
+        //记录各种攻击的计算情况[攻击判定时的刷新时间,默认为6种，间隔都为1]
+        protected AttackMessageBox attackMessageBox = new AttackMessageBox(6); 
+        
         public int getLevel()
         {
             return renderlevel;
         }
-
         public void setLevel(int i)
         {
             renderlevel = i;
         }
-
         public virtual void RenderByLevel()
         {
             Render();
         }
-
         //总体上的逻辑更新（包括一些共有的逻辑任务）
         public override void Update(double ElapsedTime)
         {
             MissTick++;             //擦弹计时器增加
             update(ElapsedTime);
+            DoMessages(ElapsedTime);//信息更新
+            attackMessageBox.Update(ElapsedTime);   //攻击间隔记录盒记录
         }
         //供给派生子弹的逻辑更新，多为特定操作（非共有操作）
         public virtual void update(double ElapsedTime)
@@ -54,13 +112,11 @@ namespace FastLoopExample
         }
         //击中目标后的反应
         public virtual void Hit(Entity loader){}
-
         //碰撞判定
         public virtual bool Collision(Collider c)
         {
             return false;
         }
-
         //擦弹判定(如果存在擦弹则返回一个坐标信息【道具出现的坐标信息】，返回的道具结果)
         public bool MissBullet(Player p, ref Vector2D position , ref Item itm)
         {
@@ -92,7 +148,42 @@ namespace FastLoopExample
         {
             return false;
         }
-
+        /// <summary>
+        /// 获得一种信息，并及时的执行任务
+        /// </summary>
+        /// <param name="msg">组件之间的传递信息</param>
+        public virtual void AcceptMessage(CmpMessage msg)
+        {
+            ComponentMessages.Add(msg);
+        }
+       
+        protected virtual void DoMessages(double elapsedTime)
+        {
+            foreach (CmpMessage msg in ComponentMessages)
+            {
+                //0号攻击判定
+                if (msg.Tag == CmpMessage.CollisionMasseageNormal)        
+                {
+                    CollisionMessages.CollisionMasseageNormal m =
+                        msg as CollisionMessages.CollisionMasseageNormal;
+                    if (attackMessageBox.AllowAttack[0])
+                    {
+                        this.Direction.rotate(180);
+                        attackMessageBox.ClosePort(0);
+                        double x, y,x1,y1;
+                        x = Position.X; y = Position.Y;
+                        x1 = m.Position.X; y1 = m.Position.Y;
+                        Vector2D vct = new Vector2D();
+                        vct.X = x-x1;
+                        vct.Y = y-y1;
+                        vct.Normalize();
+                        this.Direction.X = vct.X;
+                        this.Direction.Y = vct.Y;
+                    }
+                }
+            }
+            ComponentMessages.Clear();
+        }
     }
 
     public class Blue_Ray : Bullet

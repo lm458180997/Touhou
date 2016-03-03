@@ -52,7 +52,6 @@ namespace FastLoopExample
             int devilId = 0;
             Il.ilGenImages(1, out  devilId);
             Il.ilBindImage(devilId);        //作为使用的纹理
-
             if (!Il.ilLoadImage(path))
             {
                 System.Diagnostics.Debug.Assert(false, "Could not open file,[" + path + "].");
@@ -66,13 +65,14 @@ namespace FastLoopExample
             Il.ilDeleteImages(1, ref devilId);
             _textureDatabase.Add(textureId, new Texture(openGLId, width, height));
         }
-        public void LoadTexture(string textureId, int ImageType, byte[] imageData, int size = 0)
+
+        public void LoadTexture(string textureId, int ImageType, IntPtr imageData, int size = 0)
         {
             int devilId = 0;
             Il.ilGenImages(1, out  devilId);
             Il.ilBindImage(devilId);        //作为使用的纹理
 
-            if (!Il.ilLoadL(ImageType,imageData,imageData.Length*8))
+            if (!Il.ilLoadL(ImageType, imageData,size))
             {
                 System.Diagnostics.Debug.Assert(false, "给予的图像数据存在问题，请核对是否给予正确的图像数组和格式，以及大小");
             }
@@ -84,6 +84,38 @@ namespace FastLoopExample
             System.Diagnostics.Debug.Assert(openGLId != 0);
             Il.ilDeleteImages(1, ref devilId);
             _textureDatabase.Add(textureId, new Texture(openGLId, width, height));
+        }
+
+        public void LoadTexture(string textureId, int ImageType, byte[] imageData, int size = 0)
+        {
+            if (imageData == null)
+            {
+                throw new Exception(textureId + "提供的数据为无效数据");
+            }
+
+            int devilId = 0;
+            Il.ilGenImages(1, out  devilId);
+            Il.ilBindImage(devilId);        //作为使用的纹理
+
+            if (!Il.ilLoadL(ImageType,imageData,size))
+            {
+                System.Diagnostics.Debug.Assert(false, "给予的图像数据存在问题，请核对是否给予正确的图像数组和格式，以及大小");
+            }
+            //The files we'll be using need to be flipped before passing to OpenGL
+            Ilu.iluFlipImage();
+            int width = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
+            int height = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
+            int openGLId = Ilut.ilutGLBindTexImage();
+            System.Diagnostics.Debug.Assert(openGLId != 0);
+            Il.ilDeleteImages(1, ref devilId);
+            try
+            {
+                _textureDatabase.Add(textureId, new Texture(openGLId, width, height));
+            }
+            catch (Exception e)
+            {
+                string s = e.ToString();
+            }
         }
 
 

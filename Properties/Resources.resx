@@ -117,26 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="kaguya" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\kaguya;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Me_victory01" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\bin\x86\Debug\res\Audio\ME\001-Victory01.mid;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="_001_Wind01" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\bin\x86\Debug\res\Audio\BGS\001-Wind01.ogg;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\_1.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="竹取飞翔_静_" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\bin\x86\Debug\res\Audio\BGM\竹取飞翔~静~.mp3;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="aaa" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\aaa.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="aaa1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\aaa;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
 </root>

@@ -149,7 +149,13 @@ namespace FastLoopExample
             if (!Font_Sprites.ContainsKey(key)) return Font_Sprites["_"];
             return new Sprite(Font_Sprites[key]);
         }
-       
 
+
+
+
+        public string GetName()
+        {
+            return "Aci0";
+        }
     }
 }

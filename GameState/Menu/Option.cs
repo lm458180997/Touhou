@@ -207,14 +207,14 @@ namespace FastLoopExample.GameState.Menu
             {
                 if (Input.getKeyDown("Up"))
                 {
-                    _soundmanager.Play("002-System02.ogg");
+                    _soundmanager.Play("002-System02");
                     selected--;
                     if (selected < 0)
                         selected = 5;
                 }
                 if (Input.getKeyDown("Down"))
                 {
-                    _soundmanager.Play("002-System02.ogg");
+                    _soundmanager.Play("002-System02");
                     selected++;
                     if (selected > 5)
                         selected = 0;

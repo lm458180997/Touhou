@@ -6,6 +6,13 @@ using Tao.OpenGl;
 
 namespace FastLoopExample
 {
+
+    public interface ImportSprite
+    {
+        Sprite GetSprite();
+    }
+
+
     //精灵              （含有纹理，颜色，顶点等重要信息）
     public class Sprite
     {
@@ -14,6 +21,7 @@ namespace FastLoopExample
         Color[] _vertexColors = new Color[VertexAmount];
         Point[] _vertexUVs = new Point[VertexAmount];
         Texture _texture = new Texture();
+        public float Uvs1=0, Uvs2=0, Uvs3=1, Uvs4=1;
         public Sprite()
         {
             InitVertexPosition(new Vector(0, 0, 0), 1, 1);
@@ -145,9 +153,24 @@ namespace FastLoopExample
             _vertexColors[4] = color;
             _vertexColors[5] = color;
         }
+        public void SetColorLeft(Color color)
+        {
+            _vertexColors[2] = color;
+            _vertexColors[5] = color;
+            _vertexColors[0] = color;
+        }
+        public void SetColorRight(Color color)
+        {
+            _vertexColors[1] = color;
+            _vertexColors[3] = color;
+            _vertexColors[4] = color;
+        }
+
 
         public void SetUVs(Point topLeft, Point bottomRight) 
         {
+            Uvs1 = topLeft.X; Uvs2 = topLeft.Y;
+            Uvs3 = bottomRight.X; Uvs4 = bottomRight.Y;
             //TopLeft , TopRight , BottomLeft
             _vertexUVs[0] = topLeft;
             _vertexUVs[1] = new Point(bottomRight.X,topLeft.Y);
@@ -165,6 +188,8 @@ namespace FastLoopExample
         }
         public void SetUVs(float topleft_x, float topleft_y, float bottomright_x, float bottomright_y)
         {
+            Uvs1 = topleft_x; Uvs2 = topleft_y;
+            Uvs3 = bottomright_x; Uvs4 = bottomright_y;
             //TopLeft , TopRight , BottomLeft
             _vertexUVs[0].X = topleft_x;
             _vertexUVs[0].Y = topleft_y;
@@ -182,6 +207,25 @@ namespace FastLoopExample
             _vertexUVs[5].Y = bottomright_y;
         }
 
+        /// <summary>
+        /// 复制一个sprite。[坐标不会被复制]
+        /// </summary>
+        /// <param name="spr"></param>
+        /// <returns></returns>
+        public static Sprite Clone(Sprite spr)
+        {
+            Sprite s = new Sprite();
+            s.Texture = spr.Texture;
+            s.SetWidth((float)spr.GetWidth());
+            s.SetHeight((float)spr.GetHeight());
+            Point[] vct = spr.VertexUVs;
+            for (int i = 0; i < vct.Length; i++)
+            {
+                s.VertexUVs[i] = vct[i];
+            }
+            return s;
+        }
+
 
         //public void SetUVs(Point topleft, Point topright, Point bottomleft, Point bottomright)
         //{
@@ -190,6 +234,8 @@ namespace FastLoopExample
         //    _vertexUVs[2] = bottomleft; _vertexUVs[5] = bottomleft;
         //    _vertexUVs[4] = bottomright;
         //}
+
+
 
 
     }

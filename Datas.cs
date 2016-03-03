@@ -22,21 +22,24 @@ namespace FastLoopExample
             GameRandom = new GRandom();
         }
 
-        //游戏的难度
+        //核心随机器
+        public static GRandom GameRandom;
+
+        //游戏难度
         public  static GameLevel _GameLevel = GameLevel.normal; 
         //游戏的选择人物
         public static Dictionary<string, People> Charactors = new Dictionary<string, People>();     //能操纵的所有角色
         public static string Fore_People_Select = "ReiMu";
         public static string Back_People_Select = "YuKaRi";
+        //public static string Fore_People_Select = "Wriggle";
 
         public static int Hp_Start = 3;       //初始血量 (玩家数据，从磁盘上读取)
-        public static int Hp = 3;             //血量
+        public static int Hp = 3;             //血量   
         public static int booms = 3;          //初始的booms数量
         public static int currentbooms = 3;   //当前的booms数量
         public static int PowerPoint;         //当前的P点数
 
-        public static bool ReFre = false ;     //是否处于重播模式
-        public static GRandom GameRandom ;      //游戏的随机器（注意需要记录其种子）
+        public static bool ReFre = false ;     //是否处于重播模式、
         public static Random LooselyRandom = new Random();   //使用时机不严谨的随机数生成器（可随时调用，不会影响系统逻辑）     
 
         public static List<string> Commands;              //从磁盘上读取的命令队列(或者是在运行游戏的过程中所记录的命令队列)
