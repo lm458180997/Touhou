@@ -66,10 +66,10 @@ namespace FastLoopExample
         {
             Message msg;
             result = PeekMessage(out msg, IntPtr.Zero, 0, 0, 0);
-            if (msg.msg > 0x0007 && msg.msg<0x03E0)
-            {
-                return true;
-            }
+            //if (msg.msg > 0x0007 && msg.msg<0x03E0)
+            //{
+            //    return true;
+            //}
 
             return !result;
         }
