@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;              //包含了用于导入C类型和结构的实用函数
+using System.Runtime.InteropServices;
+using System.Threading;              //包含了用于导入C类型和结构的实用函数
 
 namespace FastLoopExample
 {
@@ -44,9 +45,13 @@ namespace FastLoopExample
 
         PreciseTimer _timer = new PreciseTimer();       //获取间隔的计时器
 
+        const int WM_MOVE = 0x0003;  //移动一个窗口
+        const int WM_SIZE = 0x0005;
+
         public FastLoop(LoopCallback callback)
         {
             _callback = callback;
+          
             Application.Idle += new EventHandler(OnApplicationEnterIdle);  //应用程序有空闲时会执行
         }
         void OnApplicationEnterIdle(object sender, EventArgs e)
@@ -56,10 +61,17 @@ namespace FastLoopExample
                 _callback(_timer.GetElapsedTime());    
             }
         }
+        bool result = false;
         private bool IsAppStillIdle()    //确定应用程序的事件队列中是否有等待处理的事件
         {
             Message msg;
-            return !PeekMessage(out msg, IntPtr.Zero, 0, 0, 0);
+            result = PeekMessage(out msg, IntPtr.Zero, 0, 0, 0);
+            if (msg.msg > 0x0007 && msg.msg<0x03E0)
+            {
+                return true;
+            }
+
+            return !result;
         }
     }
     public class PreciseTimer           //可获取帧间时间间隔
@@ -87,5 +99,42 @@ namespace FastLoopExample
         }
     }
 
+
+    public class LoopTread
+    {
+        [System.Security.SuppressUnmanagedCodeSecurity]
+        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        public static extern bool PeekMessage(out Message msg, IntPtr hWnd, uint messageFilterMin,
+            uint messageFilterMax, uint flags);
+
+        public delegate void LoopCallback(double dt);
+
+        PreciseTimer _timer = new PreciseTimer();       //获取间隔的计时器
+
+        Form1 form;
+
+        Thread thread;
+
+        public LoopTread(Form1 f)
+        {
+            form =f;
+            thread = new Thread(new ParameterizedThreadStart(Run));
+            thread.Priority = ThreadPriority.Highest;
+            thread.Start(f);
+           // Application.Idle += new EventHandler(OnApplicationEnterIdle);  //应用程序有空闲时会执行
+        } 
+
+        void Run(object form)
+        {
+            Form1 f = form as Form1;
+            while(true)
+              f.GameLoop(_timer.GetElapsedTime());
+        }
+        private bool IsAppStillIdle()    //确定应用程序的事件队列中是否有等待处理的事件
+        {
+            Message msg;
+            return !PeekMessage(out msg, IntPtr.Zero, 0, 0, 0);
+        }
+    }
 
 }

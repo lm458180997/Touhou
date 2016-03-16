@@ -23,9 +23,9 @@ namespace FastLoopExample.Entities.Players
         float height = 128;                   //显示高度
         float attackRadius = 64;              //攻击的判断半径^2
         float AttckRadiusDouble = 4096;       //两倍判断半径
-        float JudgeBegin = 160;                //弧形判定的起始角（逆时针）
-        float JudgeEnd = 180;                  //弧形判定的目标角度（逆时针）
-        float AverageAngle = 17;               //平均每帧的变化角度
+        float JudgeBegin = 160;               //弧形判定的起始角（逆时针）
+        float JudgeEnd = 180;                 //弧形判定的目标角度（逆时针）
+        float AverageAngle = 17;              //平均每帧的变化角度
         float JudgeArea = 30;                 //角度判定域[单边]（在区域以内的才视为正确判定）
 
         /// <summary>

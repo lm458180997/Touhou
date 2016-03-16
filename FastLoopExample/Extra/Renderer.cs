@@ -38,6 +38,23 @@ namespace FastLoopExample
             }
             Gl.glEnd();
         }
+        public virtual void DrawSprite3D(Sprite sprite)
+        {
+            //绑定3D纹理
+            Gl.glBindTexture(Gl.GL_TEXTURE_3D, sprite.Texture.ID);
+            //利用迭代画出每个顶点（纹理）
+            Gl.glBegin(Gl.GL_TRIANGLES);
+            {
+                for (int i = 0; i < Sprite.VertexAmount; i++)
+                {
+                    DrawImmediateModeVertex(
+                        sprite.VertexPositions[i],
+                        sprite.VertexColor[i],
+                        sprite.VertexUVs[i]);
+                }
+            }
+            Gl.glEnd();
+        }
 
         const float PI = 3.1415f;
         public virtual void DrawSprite(Sprite sprite ,float x, float y, float rad)
@@ -166,8 +183,8 @@ namespace FastLoopExample
             Gl.glTranslatef(x, y, 0);
             Gl.glRotatef(-rad, 0, 0, 1);
             Gl.glTranslatef(-x, -y, 0);
-
         }
+
         public override void DrawSprite(Sprite sprite, double _x, double _y, float rad)
         {
             float x = (float)_x;

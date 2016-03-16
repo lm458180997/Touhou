@@ -83,6 +83,7 @@ namespace FastLoopExample
         public static double GameTime;             //当前的游戏时间
 
         public Sprite Logo;       //游戏LOGO
+
         public FastLoopExample.Extra.VariableSprite  test;  //可变Sprite
 
 
@@ -134,7 +135,6 @@ namespace FastLoopExample
             test = new Extra.VariableSprite();
             test.BindSprite(Logo);
             test.SetAttribute(210, -130, 0, 192, 192);
-
 
             fonc = new FontAciHuaKang(texturemanager);
             TextWriter = new FontWriterTool(fonc);
@@ -1004,12 +1004,12 @@ namespace FastLoopExample
             GamePlayer.particle_collider.Collition(_particles, elapsedTime);     //粒子的碰撞
 
 
-            calc++;
-            percent = calc / 360;
-            if (percent > 1)
-                percent = 1;
-            test.SetAttribute(210, -130, percent);
-            test.SetColorVol(new Color(1, 1, 1, 1), new Color(1, 1, 1, percent * percent * percent));
+            //calc++;
+            //percent = calc / 360;
+            //if (percent > 1)
+            //   percent = 1;
+            //test.SetAttribute(210, -130, percent);
+            //test.SetColorVol(new Color(1, 1, 1, 1), new Color(1, 1, 1, percent * percent * percent));
         }
         float calc = 0;
         float percent = 0;
@@ -1039,21 +1039,21 @@ namespace FastLoopExample
             //_renderer_normal.DrawSprite(Logo);
 
             _renderer_normal.DrawSprite(test.GetSprite());
-
-            TextWriter.DrawString(_renderer, "测试用场景",
-                    0-40, 400, 0.7f, 300, new Color(1, 1, 1, 1), 1);
+            
 
             //写文字（测试）
-            if (percent <= 0.5)
-            {
-                TextWriter.DrawString(_renderer, "操作键说明:Z键攻击Shift减速X技能     ",
-                    -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 2 * percent);
-            }
-            else
-            {
-                TextWriter.DrawString(_renderer, "操作键说明:Z键攻击Shift减速X技能     ",
-                    -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 2 * (1-percent));
-            }
+            //if (percent <= 0.5)
+            //{
+            //    TextWriter.DrawString(_renderer, "操作键说明:Z键攻击     ",
+            //        -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 2 * percent);
+            //}
+            //else
+            //{
+            //    TextWriter.DrawString(_renderer, "操作键说明:Z键攻击     ",
+            //        -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 2 * (1-percent));
+            //}
+            //TextWriter.DrawString(_renderer, GamePlayer.Position.ToString(),
+            //        -100, 200, 0.7f, 300, new Color(1, 1, 1, 1), 1);
             Gl.glFinish();
         }
     }

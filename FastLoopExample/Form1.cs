@@ -36,6 +36,8 @@ namespace FastLoopExample
 
         FastLoop _fastloop;                                //循环事件（高效刷新）
 
+        LoopTread lp;
+
         Random rand = new Random();                        //随机数生成器
 
         public static StateSystem _system = new StateSystem();           //状态机
@@ -61,12 +63,16 @@ namespace FastLoopExample
 
             this.Text = "Stay Night" ;
             _fastloop = new FastLoop(GameLoop);            //绑定循环
+
+            //lp = new LoopTread(this);
+            //loopthread = new LoopTread(GameLoop);
+
             _openGLControl.Dock = DockStyle.Fill;          //保持为父容器填充
             _openGLControl.InitializeContexts();           //OpenGL初始化（比c++方便了不少）
             filemanager = new FileManager();
 
             LoadingSetting();                              //读取用户设置
-
+          
             InitializeDisplay();
             //读取资源
             InitializeSounds();
@@ -81,7 +87,7 @@ namespace FastLoopExample
             InitializeKeyManager();
 
             Gl.glEnable(Gl.GL_TEXTURE_2D);
-            _system.ChangeState("Menu");
+            _system.ChangeState("BattleStage1");
           //  _system.ChangeState("Stage1");
 
             _openGLControl.KeyDown += _openGLControl_KeyDown;
@@ -280,6 +286,8 @@ namespace FastLoopExample
             // ReadTextureFile("res\\Remilia\\GodGun.tg");    //神枪
             ReadTextureFile("res\\Effect\\Ef_flash1_.tg");
             ReadTextureFile("res\\Effect\\Thunder_White.tg");
+
+            ReadTextureFile("res\\Remilia\\data_character_remilia_stand.tg");
         }
 
         void InitializeGameCharactors()
@@ -303,6 +311,8 @@ namespace FastLoopExample
        
             _system.AddState("Menu" , new GameMenuState(_system,_textureManager,_soundManagerEx,this));  //游戏菜单
             _system.AddState("Stage1", new Stage1State(_system,_textureManager,_soundManagerEx,this));   //Stage1
+
+            _system.AddState("BattleStage1",new Battle.BattleStage1(_system,_textureManager,_soundManagerEx));//BattleStage1注册
         }
         void InitializeKeyManager()
         {
@@ -360,17 +370,6 @@ namespace FastLoopExample
                                     string value = arr[i].Substring(j + 1, carr.Length - j - 1);
                                     this.Text = "憧萤ヒマワリ";
                                 }
-                                if (name == "replay")
-                                {
-                                    string value = arr[i].Substring(j + 1, carr.Length - j - 1);
-                                    int v = Convert.ToInt32(value);
-                                    if (v == 1)
-                                    {
-                                        Datas.ReFre = true;
-                                    }
-                                    else
-                                        Datas.ReFre = false;
-                                }
                                 if (name == "StartHp")
                                 {
                                     string value = arr[i].Substring(j + 1, carr.Length - j - 1);
@@ -423,81 +422,81 @@ namespace FastLoopExample
 
         bool slow = false;
 
-        void GameLoop(double elapsedTime)
+        public void GameLoop(double elapsedTime)
         {
             if (elapsedTime > 0.02)
                 return;
             #region  normalloop
-            //_system.Update(elapsedTime);
-            //System.Diagnostics.Debug.Print(elapsedTime.ToString());
-            //timecaculate += elapsedTime;
-            //tick++;
-            //if (tick == defaultdivide)
-            //{
-            //    _system.Render();
-            //    _openGLControl.Refresh();
-            //    tick = 0;
-            //    if (timecaculate <= 0.2)
-            //    {
-            //        refreshtick++;
-            //    }
-            //    else
-            //    {
-            //        double fps = refreshtick / timecaculate;
-            //        //System.Diagnostics.Debug.Print("fps: " + fps.ToString() + "   defaultdivide: " + defaultdivide.ToString());
-            //        refreshtick = 0;
-            //        timecaculate = 0;
-            //        if (fps > 120)
-            //        {
-            //            defaultdivide++;
-            //        }
-            //        else
-            //        {
-            //            defaultdivide--;
-            //            if (defaultdivide < 1)
-            //                defaultdivide = 1; 
-            //        }
-            //    }
-            //}
+            _system.Update(elapsedTime);
+            System.Diagnostics.Debug.Print(elapsedTime.ToString());
+            timecaculate += elapsedTime;
+            tick++;
+            if (tick == defaultdivide)
+            {
+                _system.Render();
+                _openGLControl.Refresh();
+                tick = 0;
+                if (timecaculate <= 0.2)
+                {
+                    refreshtick++;
+                }
+                else
+                {
+                    double fps = refreshtick / timecaculate;
+                    //System.Diagnostics.Debug.Print("fps: " + fps.ToString() + "   defaultdivide: " + defaultdivide.ToString());
+                    refreshtick = 0;
+                    timecaculate = 0;
+                    if (fps > 120)
+                    {
+                        defaultdivide++;
+                    }
+                    else
+                    {
+                        defaultdivide--;
+                        if (defaultdivide < 1)
+                            defaultdivide = 1;
+                    }
+                }
+            }
             #endregion
 
             #region  固定帧率算法，有行走锯齿缺陷
-            timc += elapsedTime;
-            timecaculate += elapsedTime;
+            //timc += elapsedTime;
+            //timecaculate += elapsedTime;
             //System.Diagnostics.Debug.Print(elapsedTime.ToString());
-            if (timecaculate > per_fps)
-            {
-                workingcount++;
-                double sc = timecaculate - per_fps;
-                timecaculate -= per_fps;
-                _system.Render();
-                _openGLControl.Refresh();
-                if (sc > 0.0001)
-                {
-                    errorcount++;
-                    timecaculate = 0;
-                }
-                else
-                {
-                    _system.Update(per_fps);
-                }
-                _soundManagerEx.Update();        //声音控制器逻辑更新
-                if (timc <= 0.1)
-                    refreshtick++;
-                else
-                {
-                    refreshtick++;
-                    double fpps = refreshtick / timc;
-                    
-                    //System.Diagnostics.Debug.Print("count: " + refreshtick.ToString() + "time:" + timc.ToString()
-                    //+ "fps:" + fpps.ToString());
-                    double fpps2 = (double)errorcount / workingcount;
-                    this.Text ="fps："+fpps.ToString("f6")+ "  处理落率：" + fpps2.ToString("f6");
-                    fpps = 0;
-                    timc = 0;
-                    refreshtick = 0;
-                }
-            }
+            //if (timecaculate > per_fps)
+            //{
+            //    workingcount++;
+            //    double sc = timecaculate - per_fps;
+            //    timecaculate -= per_fps;
+            //    _system.Render();
+            //    _openGLControl.Refresh();
+            //    if (sc > 0.0001)
+            //    {
+            //        errorcount++;
+            //        timecaculate = 0;
+            //    }
+            //    else
+            //    {
+            //        _system.Update(per_fps);
+            //    }
+            //    this.Text = sc.ToString("f9");
+            //    _soundManagerEx.Update();        //声音控制器逻辑更新
+                //if (timc <= 0.1)
+                //    refreshtick++;
+                //else
+                //{
+                //    refreshtick++;
+                //    double fpps = refreshtick / timc;
+                //    //System.Diagnostics.Debug.Print("count: " + refreshtick.ToString() + "time:" + timc.ToString()
+                //    //+ "fps:" + fpps.ToString());
+                //    fpps = (double)errorcount / workingcount;
+                //    //System.Diagnostics.Debug.Print("处理落率：" + fpps.ToString());
+                //    fpps = 0;
+                //    timc = 0;
+                //    refreshtick = 0;
+                //}
+           // }
             #endregion
         }
 

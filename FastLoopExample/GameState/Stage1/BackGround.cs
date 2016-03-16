@@ -634,4 +634,89 @@ namespace FastLoopExample.GameState.Stage1
     }
 
 
+    class BackGroundImage3D : IGameObject
+    {
+        private float speed_x;                //x轴上的移动速度( percent / s)
+        private float speed_y;                //y轴上的移动速度
+        private float x, y, width, height;
+        private Renderer renderer;
+        private bool needloop = false;
+        List<Sprite> Sprites;                 //纹理队列
+
+        public float X
+        {
+            get { return x; }
+            set { x = value; }
+        }
+        public float Y
+        {
+            get { return y; }
+            set { y = value; }
+        }
+
+        TextureManager texturemanager;        //纹理管理器
+        public BackGroundImage3D(TextureManager _t, Renderer _renderer, string TextureName, float width = 385, float height = 450)
+        {
+            texturemanager = _t;
+            renderer = _renderer;
+            this.width = width; this.height = height;
+
+            Sprite sp;
+
+            sp = new Sprite();
+            sp.Texture = texturemanager.Get(TextureName);
+            sp.SetWidth(width);
+            sp.SetHeight(height);
+            sp.SetPosition(X, Y);
+
+            Sprites.Add(sp);
+
+            sp = new Sprite();
+            sp.Texture = texturemanager.Get(TextureName);
+            sp.SetWidth(width);
+            sp.SetHeight(height);
+            sp.SetPosition(X, Y);
+
+            Sprites.Add(sp);
+
+        }
+
+        public float SpeedX
+        {
+            get { return speed_x; }
+            set { speed_x = value; }
+        }
+        public float SpeedY
+        {
+            get { return speed_y; }
+            set { speed_y = value; }
+        }
+
+        public void Start()
+        {
+
+        }
+
+        public void Update(double elapsedTime)
+        {
+
+        }
+
+        public void Render()
+        {
+            
+        }
+    }
+
+    /// <summary>
+    /// 循环片段
+    /// </summary>
+    class Image3D
+    {
+
+    }
+
+
+
+
 }

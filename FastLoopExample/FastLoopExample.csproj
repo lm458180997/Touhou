@@ -86,6 +86,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ACGfile\AboutLura.cs" />
+    <Compile Include="Battle\CharactorsAnimations\BattleAnimation.cs" />
+    <Compile Include="Battle\CharactorsAnimations\RemiliaAnim\remilia_Move1.cs" />
+    <Compile Include="Battle\Players\BattlePeoples.cs" />
+    <Compile Include="Battle\Players\BattlePlayer.cs" />
+    <Compile Include="Battle\Stages\Stage1\BattleStage1.cs" />
+    <Compile Include="Battle\Stages\Stage1\BattleStageUI.cs" />
+    <Compile Include="Battle\Stages\Stage1\BS1Shared.cs" />
     <Compile Include="Datas.cs" />
     <Compile Include="Entities\Bullet\Bullet.cs" />
     <Compile Include="Entities\Bullet\BulletData.cs" />
@@ -199,6 +206,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\aaa.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Battle\Extra\" />
+    <Folder Include="Battle\Items\" />
+    <Folder Include="Battle\Stages\Menu\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
